@@ -25,8 +25,8 @@ This is **week 1 of a fresh build**. Updated as work lands.
 
 - [x] Day 1 — Project scaffold (Vite + React + TS + Tailwind v4 + shadcn + Wouter + TanStack Query + Inter)
 - [x] Day 2 — Database (Neon Postgres) + Drizzle schema (users, mezcal_reviews, mezcal_comparisons) + migrations
-- [ ] Day 3 — API + email-only auth (magic links via Resend) + guest mode
-- [ ] Day 4 — Deploy to Vercel + custom domain + PWA install
+- [x] Day 3 — API + email-only auth (magic links via Resend) + guest mode
+- [ ] Day 4 — Deploy to Vercel (domain reserved at mezcalito.app via Vercel) + PWA install
 - [ ] Day 5 — Capture form placeholder + design polish
 
 After Week 1: photo capture pipeline (camera + EXIF + GPS + OCR), capture form, visual archive, 12-family flavor wheel widget, ELO comparison ritual, share card, friend invites.

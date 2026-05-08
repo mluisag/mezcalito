@@ -64,6 +64,16 @@ export const mezcalReviews = pgTable("mezcal_reviews", {
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
 })
 
+// ─── auth_tokens (single-use magic-link tokens) ──────────
+export const authTokens = pgTable("auth_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull(),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  consumedAt: timestamp("consumed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+})
+
 // ─── mezcal_comparisons ──────────────────────────────────
 export const mezcalComparisons = pgTable("mezcal_comparisons", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -127,3 +137,5 @@ export type MezcalReview = typeof mezcalReviews.$inferSelect
 export type NewMezcalReview = typeof mezcalReviews.$inferInsert
 export type MezcalComparison = typeof mezcalComparisons.$inferSelect
 export type NewMezcalComparison = typeof mezcalComparisons.$inferInsert
+export type AuthToken = typeof authTokens.$inferSelect
+export type NewAuthToken = typeof authTokens.$inferInsert

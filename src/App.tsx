@@ -1,7 +1,43 @@
+import { useEffect } from "react"
 import { Route, Switch, Link, useLocation } from "wouter"
-import { Camera, Home as HomeIcon, Scale } from "lucide-react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { Camera, Home as HomeIcon, Scale, LogOut } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { api, type CurrentUser } from "@/lib/api"
+import { SignInGate } from "@/components/SignInGate"
+
+function GuestBanner({ user }: { user: CurrentUser }) {
+  if (!user.isGuest) return null
+  return (
+    <div className="rounded-2xl border border-purple-200/60 bg-purple-50/80 px-4 py-3 text-xs text-purple-900 dark:border-purple-900/40 dark:bg-purple-950/40 dark:text-purple-100">
+      You're using guest mode. Add an email to save your collection across devices.
+    </div>
+  )
+}
+
+function Header({ user }: { user: CurrentUser }) {
+  const qc = useQueryClient()
+  const logout = useMutation({
+    mutationFn: () => api.logout(),
+    onSuccess: () => qc.setQueryData(["me"], { user: null }),
+  })
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-muted-foreground">
+        {user.email ?? "Guest"}
+      </span>
+      <button
+        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        onClick={() => logout.mutate()}
+        aria-label="Sign out"
+      >
+        <LogOut className="h-3.5 w-3.5" />
+        Sign out
+      </button>
+    </div>
+  )
+}
 
 function Home() {
   return (
@@ -98,9 +134,35 @@ function BottomNav() {
 }
 
 function App() {
+  const me = useQuery({
+    queryKey: ["me"],
+    queryFn: () => api.me(),
+    staleTime: 30_000,
+  })
+
+  // Strip ?auth=ok|missing-token|invalid-or-expired from URL after verify redirect.
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    if (url.searchParams.has("auth")) {
+      url.searchParams.delete("auth")
+      window.history.replaceState({}, "", url.toString())
+    }
+  }, [])
+
+  if (me.isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-fuchsia-50 dark:from-purple-950/40 dark:via-background dark:to-fuchsia-950/40" />
+    )
+  }
+
+  const user = me.data?.user ?? null
+  if (!user) return <SignInGate />
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-fuchsia-50 pb-24 dark:from-purple-950/40 dark:via-background dark:to-fuchsia-950/40">
-      <main className="mx-auto max-w-2xl px-6 pt-12">
+      <main className="mx-auto max-w-2xl px-6 pt-8 space-y-4">
+        <Header user={user} />
+        <GuestBanner user={user} />
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/capture" component={Capture} />
